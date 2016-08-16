@@ -32,13 +32,14 @@ class Member extends REST_Controller {
 
 	public function list_artikel()
 	{
-		return Validation::validate($this, '', '', function($token, $output)
+		return Validation::validate($this, 'user', 'read', function($token, $output)
 		{
+	
 			$list = $this->M_member->get_list();
 			foreach($list->result() as $data) {
-				$output['id'] = $data->id;
-				$output['judul'] = $data->judul;
-				$output['isi'] = $data->isi;
+				$output[]['id'] = $data->id;
+				$output[]['judul'] = $data->judul;
+				$output[]['isi'] = $data->isi;
 			}
 			return $output;
 		});
@@ -55,6 +56,21 @@ class Member extends REST_Controller {
 				$output['judul'] = $data->judul;
 				$output['isi'] = $data->isi;
 			}
+			return $output;
+		});
+	}
+
+	public function permissions()
+	{
+		$this->form_validation->set_rules('resource', 'resource', 'required');
+		return Validation::validate($this, 'user', 'read', function($token, $output)
+		{
+			$resource = $this->input->post('resource');
+			$acl = new ACL();
+			$permissions = $acl->userPermissions($token->id, $resource);
+			$output['status'] = true;
+			$output['resource'] = $resource;
+			$output['permissions'] = $permissions;
 			return $output;
 		});
 	}
